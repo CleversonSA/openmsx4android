@@ -1,0 +1,3 @@
+[submodule "app/src/main/cpp/openmsx"]
+	path = app/src/main/cpp/openmsx
+	url = https://github.com/openMSX/openMSX.git
