@@ -1,9 +1,14 @@
 uniform sampler2D u_tex;
 
-varying float v_color;
-varying vec2 v_texCoord;
+//varying is deprecated at GLSL ES 3.00
+in float v_color;
+in vec2 v_texCoord;
+
+//gl_FragColor is deprecated at GLSL ES 3.00
+out vec4 fragColor;
 
 void main()
 {
-	gl_FragColor = v_color * texture2D(u_tex, v_texCoord);
+    //texture2D is deprecated at GLSL ES 3.00
+	fragColor = v_color * texture(u_tex, v_texCoord);
 }

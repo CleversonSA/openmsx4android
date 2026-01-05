@@ -1,12 +1,14 @@
 uniform mat4 u_mvpMatrix;
 uniform mat3 u_normalMatrix;
 
-attribute vec3 a_position;
-attribute vec3 a_normal;
-attribute vec2 a_texCoord;
+//Attribute is deprecated at GLSL ES 3.00
+in vec3 a_position;
+in vec3 a_normal;
+in vec2 a_texCoord;
 
-varying float v_color;
-varying vec2 v_texCoord;
+//varying is deprecated at GLSL ES 3.00
+out float v_color;
+out vec2 v_texCoord;
 
 void main()
 {

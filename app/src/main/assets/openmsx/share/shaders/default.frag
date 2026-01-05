@@ -1,16 +1,21 @@
 uniform sampler2D tex;
 uniform sampler2D videoTex;
 
-varying vec2 texCoord;
-varying vec2 videoCoord;
+//varying is deprecated at GLSL ES 3.00
+in vec2 texCoord;
+in vec2 videoCoord;
+
+//gl_FragColor is deprecated at GLSL ES 3.00
+out vec4 fragColor;
 
 void main()
 {
 #if SUPERIMPOSE
-	vec4 col = texture2D(tex, texCoord);
-	vec4 vid = texture2D(videoTex, videoCoord);
-	gl_FragColor = mix(vid, col, col.a);
+	vec4 col = texture(tex, texCoord);
+	vec4 vid = texture(videoTex, videoCoord);
+	fragColor = mix(vid, col, col.a);
 #else
-	gl_FragColor = texture2D(tex, texCoord);
+    //texture2D is deprecated at GLSL ES 3.00
+    fragColor = texture(tex, texCoord);
 #endif
 }

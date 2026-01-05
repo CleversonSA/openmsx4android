@@ -1,0 +1,13 @@
+//
+// Created by cleve on 18/12/2025.
+//
+
+#ifndef VERSION_II
+#define VERSION_II
+
+const bool Version::RELEASE = false;
+const char* const Version::VERSION = "21.0-RC-ANDROID";
+const char* const Version::REVISION = "RC-20251221";
+const char* const Version::COPYRIGHT = "OpenMSX Team - CSA";
+
+#endif //VERSION_II

@@ -1,11 +1,13 @@
 uniform mat4 u_mvpMatrix;
 uniform vec3 texSize; // not used
 
-attribute vec4 a_position;
-attribute vec3 a_texCoord;
+//Attribute is deprecated at GLSL ES 3.00
+in vec4 a_position;
+in vec3 a_texCoord;
 
-varying vec2 texCoord;
-varying vec2 videoCoord;
+//varying is deprecated at GLSL ES 3.00
+out vec2 texCoord;
+out vec2 videoCoord;
 
 void main()
 {

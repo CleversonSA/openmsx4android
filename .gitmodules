@@ -1,3 +1,12 @@
 [submodule "app/src/main/cpp/openmsx"]
 	path = app/src/main/cpp/openmsx
 	url = https://github.com/openMSX/openMSX.git
+[submodule "app/src/main/cpp/imgui"]
+	path = app/src/main/cpp/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "app/src/main/cpp/freetype"]
+	path = app/src/main/cpp/freetype
+	url = https://github.com/freetype/freetype.git
+[submodule "app/src/main/cpp/SDL_ttf"]
+	path = app/src/main/cpp/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf.git
