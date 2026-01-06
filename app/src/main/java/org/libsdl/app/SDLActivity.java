@@ -1941,10 +1941,22 @@ class DummyEdit extends View implements View.OnKeyListener {
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         ic = new SDLInputConnection(this, true);
 
-        outAttrs.inputType = InputType.TYPE_CLASS_TEXT |
-                             InputType.TYPE_TEXT_FLAG_MULTI_LINE;
-        outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI |
-                              EditorInfo.IME_FLAG_NO_FULLSCREEN /* API 11 */;
+        /*outAttrs.inputType = InputType.TYPE_CLASS_TEXT |
+                             InputType.TYPE_TEXT_FLAG_MULTI_LINE;*/
+        // Reduce IME "commit word" behavior (suggestions/autocorrect)
+        outAttrs.inputType = InputType.TYPE_CLASS_TEXT
+                | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+                | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
+
+        // Avoid fullscreen extract UI that can mess with event flow
+        //outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI |
+        //                      EditorInfo.IME_FLAG_NO_FULLSCREEN /* API 11 */;
+        outAttrs.imeOptions =  EditorInfo.IME_FLAG_NO_FULLSCREEN
+                | EditorInfo.IME_FLAG_NO_EXTRACT_UI
+                | EditorInfo.IME_ACTION_NONE;
+
+        // Some keyboards respect this (best-effort)
+        outAttrs.privateImeOptions = "nm";
 
         return ic;
     }
