@@ -249,6 +249,7 @@ file(GLOB_RECURSE OPENMSX_SRC
 
 file(GLOB_RECURSE OPENMSX_GENERATED_SRC
         ${OPENMSX_GEN_DIR}/*.hh
+        ${OPENMSX_GEN_DIR}/*.cc
 )
 
 foreach(f ${OPENMSX_SRC})
@@ -275,7 +276,10 @@ list(FILTER OPENMSX_SRC EXCLUDE REGEX ".*/src/unittest/.*")
 list(FILTER OPENMSX_SRC EXCLUDE REGEX ".*/src/video/PNG\\.cc$")
 list(FILTER OPENMSX_SRC EXCLUDE REGEX ".*/src/video/PNG\\.hh$")
 
-add_library(openmsx_core STATIC ${OPENMSX_SRC})
+add_library(openmsx_core STATIC
+        ${OPENMSX_SRC}
+        ${OPENMSX_GENERATED_SRC}
+)
 
 target_include_directories(openmsx_core PUBLIC
         ${OPENMSX_GEN_DIR}

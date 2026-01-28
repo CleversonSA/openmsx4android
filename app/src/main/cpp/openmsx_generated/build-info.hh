@@ -25,7 +25,7 @@
 namespace openmsx {
 
     static const bool OPENMSX_SET_WINDOW_ICON = false;
-    static const char* const DATADIR = "/data/data/com.openmsx.openmsx4android/files/openmsx/share";
+    extern const char* DATADIR;
     static const char* const BUILD_FLAVOUR = "opt";
     static const char* const TARGET_PLATFORM = "android";
     static const char* const TARGET_CPU = "armv8";

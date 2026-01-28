@@ -7,6 +7,10 @@ android {
     namespace = "com.openmsx.openmsx4android"
     ndkVersion = "29.0.14206865"
 
+    androidResources {
+        noCompress += "gz"
+    }
+
     packaging {
         jniLibs {
             useLegacyPackaging = false

@@ -632,4 +632,5 @@ share/unicodemaps/unicodemap.se
 share/unicodemaps/unicodemap.sega_int
 share/unicodemaps/unicodemap.sega_jp
 share/unicodemaps/unicodemap.svi
-share/systemroms/expert_1.1_basic-bios.rom
+share/skins/DejaVuSans.ttf
+share/skins/DejaVuSansMono.ttf
