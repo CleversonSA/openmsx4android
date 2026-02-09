@@ -1,0 +1,129 @@
+name: Build Release binaries from tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to build'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: ${{ matrix.name }} ${{ matrix.cpu }}
+    runs-on: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: ubuntu-latest
+            name: Unit Tests (on Linux)
+            cpu: x86_64
+            os: linux
+            flavour: unittest
+          - image: ubuntu-latest
+            name: Linux
+            cpu: x86_64
+            os: linux
+            flavour: opt
+#          - image: ubuntu-latest
+#            name: Linux
+#            cpu: aarch64
+#            os: linux
+#            flavour: opt
+          - image: ubuntu-24.04
+            name: Windows
+            cpu: x86_64
+            os: mingw-w64
+            flavour: opt
+          - image: macos-15
+            xcode_version: 16.4
+            name: MacOS
+            cpu: x86_64
+            os: darwin
+            flavour: opt
+          - image: macos-15
+            xcode_version: 16.4
+            name: MacOS
+            cpu: aarch64
+            os: darwin
+            flavour: opt
+#          - image: ubuntu-latest
+#            name: Android
+#            cpu: arm
+#            os: android
+#            flavour: opt
+          - image: windows-latest
+            name: Windows-VC
+            cpu: x64
+            os: windows-vc
+            flavour: opt
+    steps:
+    - name: Get current master code from Git repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Create tarball
+      shell: bash
+      run: python3 build/gitdist.py ${{ inputs.tag }}
+    - name: Determine tarball name
+      id: get_dist_name
+      shell: bash
+      run: |
+        NAME=`PYTHONPATH=build python3 -c "import gitdist; rel='${{ inputs.tag }}'; print (f'openmsx-{gitdist.niceVersionFromGitDescription(gitdist.getDescription(rel))}')"`
+        echo "tarball_name=$NAME.tar.gz" >> $GITHUB_OUTPUT
+        echo "dist_name=$NAME" >> $GITHUB_OUTPUT
+    - name: Move tarball to root
+      shell: bash
+      run: mv derived/dist/${{ steps.get_dist_name.outputs.tarball_name }} .
+    - name: Upload tarball as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-${{ matrix.cpu }}-${{ matrix.flavour }}_${{ steps.get_dist_name.outputs.tarball_name }}
+        path: ${{ steps.get_dist_name.outputs.tarball_name }}
+    - name: Remove everything except tarball from root
+      shell: bash
+      run: |
+        shopt -s extglob
+        rm -rf -v !("${{ steps.get_dist_name.outputs.tarball_name }}")
+    - name: Extract tarball
+      uses: a7ul/tar-action@v1.2.0
+      id: extract
+      with:
+        command: x
+        files: ${{ steps.get_dist_name.outputs.tarball_name }}
+    - name: Move extracted tarball contents to root
+      shell: bash
+      run: mv ${{ steps.get_dist_name.outputs.dist_name }}/* .
+    - name: Select Xcode version
+      if: ${{ matrix.xcode_version }}
+      run: sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode_version }}.app/Contents/Developer
+    - name: Preparations for signing binaries on Darwin builds
+      if: matrix.os == 'darwin'
+      uses: ./.github/actions/prepare-sign
+      env:
+        BUILD_CERTIFICATE_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+        P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+      with:
+        os: ${{ matrix.os }}
+    - name: Preparations for notarizing binaries on Darwin builds
+      if: matrix.os == 'darwin'
+      uses: ./.github/actions/prepare-notarize
+      env:
+        NOTARY_API_KEY: ${{ secrets.NOTARY_API_KEY }}
+        NOTARY_API_KEY_ID: ${{ vars.NOTARY_API_KEY_ID }}
+        NOTARY_API_ISSUER: ${{ vars.NOTARY_API_ISSUER }}
+        NOTARY_PROFILE: ${{ vars.NOTARY_PROFILE }}
+      with:
+        os: ${{ matrix.os }}
+    - name: Perform build on extracted tarball
+      env:
+        CODE_SIGN_IDENTITY: ${{ vars.CODE_SIGN_IDENTITY }}
+        NOTARY_PROFILE: ${{ vars.NOTARY_PROFILE }}
+      # Directory name only
+      uses: ./.github/actions/build
+      with:
+        os: ${{ matrix.os }}
+        cpu: ${{ matrix.cpu }}
+        flavour: ${{ matrix.flavour }}
