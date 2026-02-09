@@ -50,9 +50,9 @@ public class OpenMSX4AndroidSDLActivity extends SDLActivity {
         kb.setImageResource(android.R.drawable.ic_menu_directions);
         kb.setBackgroundResource(android.R.drawable.btn_default);
 
-        int size = dp(64);
+        int size = dp(72);
         int margin = dp(12);
-        int spacing = dp(8);
+        int spacing = dp(12);
 
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size);
         lp.gravity = Gravity.BOTTOM | Gravity.END;
@@ -80,7 +80,7 @@ public class OpenMSX4AndroidSDLActivity extends SDLActivity {
         kb.setImageResource(android.R.drawable.ic_menu_edit); // ícone simples
         kb.setBackgroundResource(android.R.drawable.btn_default); // básico
 
-        int size = dp(64);
+        int size = dp(72);
         int margin = dp(12);
 
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(size, size);
@@ -203,16 +203,16 @@ public class OpenMSX4AndroidSDLActivity extends SDLActivity {
     private FrameLayout buildDpadPanel() {
         FrameLayout panel = new FrameLayout(this);
 
-        int btn = dp(64);
-        int pad = dp(8);
+        int btn = dp(72);
+        int pad = dp(12);
         int box = btn * 3 + pad * 2;
 
         FrameLayout.LayoutParams plp = new FrameLayout.LayoutParams(box, box);
         plp.gravity = android.view.Gravity.BOTTOM | android.view.Gravity.END;
 
-        int margin = dp(12);
-        int pencilSize = dp(48);
-        plp.setMargins(margin, margin, margin, margin + pencilSize + dp(10));
+        int margin = dp(8);
+        int pencilSize = dp(72);
+        plp.setMargins(margin, margin, margin, margin + pencilSize + dp(15));
         panel.setLayoutParams(plp);
 
         android.widget.Button enter = new android.widget.Button(this);
@@ -255,15 +255,15 @@ public class OpenMSX4AndroidSDLActivity extends SDLActivity {
     private FrameLayout buildExtraPanel() {
         FrameLayout panel = new FrameLayout(this);
 
-        int btn = dp(64);
-        int pad = dp(8);
+        int btn = dp(72);
+        int pad = dp(12);
         int box = btn * 3 + pad * 2;
 
         FrameLayout.LayoutParams plp = new FrameLayout.LayoutParams(box, box);
         plp.gravity = android.view.Gravity.BOTTOM | android.view.Gravity.START;
 
-        int margin = dp(12);
-        int pencilSize = dp(48);
+        int margin = dp(8);
+        int pencilSize = dp(72);
         plp.setMargins(margin, margin, margin, margin + pencilSize + dp(10));
         panel.setLayoutParams(plp);
 
