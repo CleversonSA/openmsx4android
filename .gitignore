@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+./app/src/main/cpp/freetype/.git
+./app/src/main/cpp/imgui/.git
+./app/src/main/cpp/openmsx/.git
+./app/src/main/cpp/SDL_ttf/.git
