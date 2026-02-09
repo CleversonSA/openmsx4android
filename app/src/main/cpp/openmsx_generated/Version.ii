@@ -6,8 +6,8 @@
 #define VERSION_II
 
 const bool Version::RELEASE = false;
-const char* const Version::VERSION = "21.0-RC-ANDROID";
-const char* const Version::REVISION = "RC-20251221";
-const char* const Version::COPYRIGHT = "OpenMSX Team - CSA";
+const char* const Version::VERSION = "21.0-RC-UNOFFICIAL-ANDROID";
+const char* const Version::REVISION = "20260209";
+const char* const Version::COPYRIGHT = "OpenMSX Team";
 
 #endif //VERSION_II
