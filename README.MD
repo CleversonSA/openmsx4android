@@ -94,7 +94,7 @@ So I can start openmsx with my custom settings.
 The ```cmdline.txt``` is not present by default installation, if you wanna custom settings, you have to create a new one at:
 
 ```
-/storage/emualted/0/Android/media/com.openmsx.openmsx4android/openmsx/share
+/storage/emulated/0/Android/media/com.openmsx.openmsx4android/openmsx/share
 ```
 
 folder.
@@ -153,6 +153,20 @@ If you have Android Studio fully working, with Java paths and NDK working, Just 
 
 **Attention**: As a BIG project, the first compilation may took 40min-1 hour (I use a i5 7gen 16GB RAM).
 
+# CONTRIBUTING
+
+It´s a just for fun project. I enjoy have at my Smartphone or tablet an MSX Gradiente Expert or Sharp Hotbit machine. I decided to keep open for contributing to improve this port and future help to OpenMSX community to build again an official Android Port of the emulator.
+
+## 2026-02-09 release
+
+This release uses the Nov/2025 latest closed release of OpenMSX 21. I tried to keep the project as submodules but It was a nightmare to push my PORT changes to my repo, before plan how to create a PR to the main OpenMSX Repo.
+
+As I said, OpenMSX was used as a giant library, and some classes I changed with my stubs implementation (checkout ```src/main/cpp/openmsx_android``` and ```src/main/cpp/openmsx_generated``` folders)), and I modified my CMakeLists.txt to ignore the OpenMSX main class and use mine (checkout ```src/main.cpp```), where all things started.
+
+Of course, to get possible run the emulator on Android Platform, using ANativeWindow, the port has a Java layer, created from SDL2 template (checkout ```src/main/java/org/libsdl/app/OpenMSX4AndroidSDLActivity```) as a "glue".
+
+
+
 # KNOWN ISSUES
 
 ## 2026-02-09 release
@@ -175,6 +189,7 @@ If you have Android Studio fully working, with Java paths and NDK working, Just 
 
 * **I had an old tablet, and I couldn´t install OpenMSX, it hangs** - Only Android 14+ is supported.
 
+* **Sometimes virtual keyboard and overlay buttons doesn´t respond** - It´s just overlay focus. Just tap into MSX screen and try again.
 
 
 # CHANGELOG
