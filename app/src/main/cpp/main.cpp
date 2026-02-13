@@ -252,7 +252,7 @@
 
         extractOpenmsxAssets(openmsx::DATADIR);
 
-        //args = {"openmsx","-machine","Gradiente_Expert_GPC-1", "-command","set fullscreen on"};
+        //std::vector<std::string> args = {"openmsx","-machine","Gradiente_Expert_GPC-1", "-command","set fullscreen on"};
         std::vector<std::string> args = loadArgsFromCmdlineFile(openmsx::DATADIR);
 
         if (args.size() == 1) {
