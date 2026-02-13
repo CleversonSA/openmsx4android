@@ -131,8 +131,7 @@ You don´t need to jailbreak/root/enable development to put files.
 
 # WHAT´S NOT SUPPORTED (YET)
 
-### 2026-02-09 release
-
+* **No Joystick Support** - As a test, I´ve used a bluetooth X-BoxOne controller and hard joystick. Nothing worked. May be I have to capture the Joystick Events and send to emulator, but I think it´s a bit strange.
 * **No screen rotation** - Not about Android sensors, but how to patch the OpenMSX OSD engine to redraw screen with new screen aspects.
 * **No user openMSX folders (like "persistent")** - Not hard to correct it, but got a effort to do it.
 * **No overlay functions keys** - Not hard to implement, but takes time
@@ -157,8 +156,6 @@ If you have Android Studio fully working, with Java paths and NDK working, Just 
 
 It´s a just for fun project. I enjoy have at my Smartphone or tablet an MSX Gradiente Expert or Sharp Hotbit machine. I decided to keep open for contributing to improve this port and future help to OpenMSX community to build again an official Android Port of the emulator.
 
-## 2026-02-09 release
-
 This release uses the Nov/2025 latest closed release of OpenMSX 21. I tried to keep the project as submodules but It was a nightmare to push my PORT changes to my repo, before plan how to create a PR to the main OpenMSX Repo.
 
 As I said, OpenMSX was used as a giant library, and some classes I changed with my stubs implementation (checkout ```src/main/cpp/openmsx_android``` and ```src/main/cpp/openmsx_generated``` folders)), and I modified my CMakeLists.txt to ignore the OpenMSX main class and use mine (checkout ```src/main.cpp```), where all things started.
@@ -168,10 +165,6 @@ Of course, to get possible run the emulator on Android Platform, using ANativeWi
 
 
 # KNOWN ISSUES
-
-## 2026-02-09 release
-
-* **Android´s virtual keyboard fails when SHIFT is pressed, sometimes works, sometimes not** - May be a problem at InputEventGenerator.cc logic to read SDL events and send them to the emulator engine. Needs improvment.
 
 * **Sometimes some keys like backspace and enter is pressed forever at virtual keyboard** - I think I need double check or try a new logic at InputEventGenerator.cc. The workaround is press the same key again, until stops.
 
@@ -185,14 +178,18 @@ Of course, to get possible run the emulator on Android Platform, using ANativeWi
 
 * **I created the cmdline.txt file now OpenMSX hangs out** - Check settings and file/dir appointments inside the file, a incorrect parameter may hangs openmsx starting. If It happens for you, just delete cmdfile.txt and check again.
 
-* **CAPS LOCK at Android´s virtual keyboard doesn´t work very well, I had to press so many times a key to got working** - Need to improve the InputEventGenerator.cc logic. 
-
 * **I had an old tablet, and I couldn´t install OpenMSX, it hangs** - Only Android 14+ is supported.
 
 * **Sometimes virtual keyboard and overlay buttons doesn´t respond** - It´s just overlay focus. Just tap into MSX screen and try again.
 
 
 # CHANGELOG
+
+## 2026-02-13 release
+
+* Improved a lot Android´s Virtual Keyboard support (almost no mistyping keys)
+* Corrected SHIFT and CAPS lock support for Android´s Virtual Keyboard
+* Removed PTBR comments but improved some stock comments from main project. Better for documentation
 
 ## 2026-02-09 release
 
