@@ -7,7 +7,7 @@
 
 const bool Version::RELEASE = false;
 const char* const Version::VERSION = "21.0-RC-UNOFFICIAL-ANDROID";
-const char* const Version::REVISION = "20260209";
+const char* const Version::REVISION = "13022026";
 const char* const Version::COPYRIGHT = "OpenMSX Team";
 
 #endif //VERSION_II

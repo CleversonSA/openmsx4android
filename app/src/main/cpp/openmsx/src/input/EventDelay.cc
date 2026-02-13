@@ -16,6 +16,13 @@
 #include <algorithm>
 #include <cassert>
 
+#if defined(__ANDROID__)
+#include <android/log.h>
+#define ALOG(...) __android_log_print(ANDROID_LOG_DEBUG, "OPENMSX::EventDelay", __VA_ARGS__)
+#else
+#define ALOG(...)
+#endif
+
 namespace openmsx {
 
 EventDelay::EventDelay(Scheduler& scheduler_,
@@ -90,7 +97,25 @@ void EventDelay::sync(EmuTime curEmu)
 	// take up to 2 vertical interrupts (2 screen refreshes) for the MSX to
 	// see the key press in the keyboard matrix, thus, 2/50 seconds is the
 	// minimum delay required for an MSX running in PAL mode.
+    //
+    // 2026 Note: Porting to Android 14+ I noticed that virtual Android´s keyboard
+    //            got a strange behaviour when pressing keys, with or without SHIFT.
+    // there´s no delay between keydown and keyup, and, without this delay method,
+    // none keypress work or, sometimes, works but the keydown event got stuck,
+    // repeating forever the last keypress.
+    // After some search and this block of comment above, I got it working, but was
+    // not perfect at the first releases, because at a smarphone or tablet, I got a
+    // lot of mistyping keys and shift lock function was worst (not working).
+    // When I activated this deltaMs to avoid repetition, I had to duplicate the
+    // amount of delayTime to got virtual keyboard working well (trial and error values
+    // testing it on a real device). So 80ms got almost perfect.
+    // But I had an issue when It was shift lock keys, I got mistyping keys even I increase
+    // the deltaDelay time. I noticed that the first SDL event and Last SDL event was so fast
+    // that got the same timestamp tick. I think this was confusing the emulator keypress decoding
+    // so I added a deltaDelay to "fake" the timestamp. I got really better results after
+    // this.
 	std::vector<Event> toBeRescheduledEvents;
+    int deltaDelay = 0;
 #endif
 
 	EmuTime time = curEmu + extraDelay;
@@ -102,12 +127,9 @@ void EventDelay::sync(EmuTime curEmu)
             const auto keyCode = keyEvent.getKeyCode();
             const auto unicode = keyEvent.getUnicode();
 
-            // --- chave para correlacionar DOWN/UP ---
-            // Normal: usa keyCode sem o scancode-mask.
-            // Unicode-only (keyCode == SDLK_UNKNOWN): usa unicode (pra não colidir tudo em UNKNOWN).
             int maskedKeyCode;
             if (keyCode == SDLK_UNKNOWN && unicode != 0) {
-                maskedKeyCode = int(unicode) | 0x40000000; // namespace separado
+                maskedKeyCode = int(unicode) | 0x40000000; // separated namespace
             } else {
                 maskedKeyCode = int(keyCode) & ~int(SDLK_SCANCODE_MASK);
             }
@@ -116,32 +138,31 @@ void EventDelay::sync(EmuTime curEmu)
                                         [](const auto& p) { return p.first; });
 
             if (getType(e) == EventType::KEY_DOWN) {
-                // guarda/atualiza o último KEY_DOWN visto para esta tecla (chave)
+                // store/update the last seen KEY_DOWN event to this keypress (key)
                 if (it == end(nonMatchedKeyPresses)) {
                     nonMatchedKeyPresses.emplace_back(maskedKeyCode, e);
                 } else {
                     it->second = e;
                 }
             } else {
-                // KEY_UP: se temos o DOWN correspondente, mede intervalo em ms usando timestamp do SDL
+                // KEY_UP: if we has a correponding DOWN event, check the SDL interval timestamp
                 if (it != end(nonMatchedKeyPresses)) {
 
                     const auto& pressSdl  = get_event<SdlEvent>(it->second).getCommonSdlEvent().timestamp;
                     const auto& releaseSdl = get_event<SdlEvent>(e).getCommonSdlEvent().timestamp;
 
-                    // timestamps são uint32 ms; diferença funciona mesmo com wrap (unsigned)
                     uint32_t deltaMs = uint32_t(releaseSdl - pressSdl);
 
-                    // 2/50s ≈ 40ms (como no comentário original)
-                    if (deltaMs <= 40) {
-                        // Recria KEYUP com timestamp atualizado (SDL_GetTicks())
+                    if (deltaMs <= 80) {
+#if defined(__ANDROID__)
+                        ALOG("SDL keypress/release delay [%u]ms - keycode [%d] - sdl ticks [%d]",deltaMs,keyCode,SDL_GetTicks());
+#endif
+
                         SDL_Event newUp = get_event<SdlEvent>(e).getSdlEvent(); // copia o SDL_Event original
 
-                        // atualiza timestamp para "agora"
-                        newUp.key.timestamp = SDL_GetTicks();
+                        deltaDelay++;
+                        newUp.key.timestamp = SDL_GetTicks() + deltaDelay;
 
-                        // (Opcional/Importante p/ unicode-only)
-                        // preserva unicode no 'unused' (hack do openMSX)
                         newUp.key.keysym.unused = keyEvent.getUnicode();
 
                         newUp.type = SDL_KEYUP;
@@ -154,10 +175,10 @@ void EventDelay::sync(EmuTime curEmu)
                         continue;
                     }
 
-                    // se não reagendou, remove o registro de DOWN
                     move_pop_back(nonMatchedKeyPresses, it);
                 }
             }
+
         }
 #endif
 		scheduledEvents.push_back(e);

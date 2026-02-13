@@ -17,7 +17,7 @@
 #if defined(__ANDROID__)
 #include <jni.h>
 #include <android/log.h>
-#define ALOG(...) __android_log_print(ANDROID_LOG_DEBUG, "openMSX-SDL", __VA_ARGS__)
+#define ALOG(...) __android_log_print(ANDROID_LOG_DEBUG, "InputEventGenerator", __VA_ARGS__)
 #else
 #define ALOG(...)
 #endif
@@ -117,19 +117,17 @@ namespace openmsx {
         e.key.keysym.sym = sym;
         e.key.keysym.mod = mod;
         e.key.keysym.scancode = SDL_GetScancodeFromKey(sym);
-        e.key.keysym.unused = unicode; // openMSX usa isso como unicode
+        e.key.keysym.unused = unicode;
     }
 
     static bool unicodeToSdlKey(uint32_t u, SDL_Keycode& sym, SDL_Keymod& mod)
     {
         mod = KMOD_NONE;
 
-        // Controle básico
         if (u == '\n' || u == '\r') { sym = SDLK_RETURN; return true; }
         if (u == '\t')             { sym = SDLK_TAB;    return true; }
         if (u == ' ')              { sym = SDLK_SPACE;  return true; }
 
-        // Letras
         if (u >= 'a' && u <= 'z') {
             sym = SDL_Keycode(SDLK_a + (u - 'a'));
             return true;
@@ -140,16 +138,14 @@ namespace openmsx {
             return true;
         }
 
-        // Dígitos
         if (u >= '0' && u <= '9') {
             sym = SDL_Keycode(SDLK_0 + (u - '0'));
             return true;
         }
 
-        // Pontuação simples (sem shift)
         switch (u) {
-            case '\'': sym = SDLK_QUOTE;       return true; // aspas simples
-            case '`':  sym = SDLK_BACKQUOTE;   return true; // crase
+            case '\'': sym = SDLK_QUOTE;       return true;
+            case '`':  sym = SDLK_BACKQUOTE;   return true;
             case '-':  sym = SDLK_MINUS;       return true;
             case '=':  sym = SDLK_EQUALS;      return true;
             case '[':  sym = SDLK_LEFTBRACKET; return true;
@@ -161,11 +157,10 @@ namespace openmsx {
             case '/':  sym = SDLK_SLASH;       return true;
         }
 
-        // Pontuação com SHIFT
         switch (u) {
-            case '"':  sym = SDLK_QUOTE;        mod = KMOD_SHIFT; return true; // aspas duplas
-            case '^':  sym = SDLK_6;            mod = KMOD_SHIFT; return true; // circunflexo
-            case '~':  sym = SDLK_BACKQUOTE;    mod = KMOD_SHIFT; return true; // til
+            case '"':  sym = SDLK_QUOTE;        mod = KMOD_SHIFT; return true;
+            case '^':  sym = SDLK_6;            mod = KMOD_SHIFT; return true;
+            case '~':  sym = SDLK_BACKQUOTE;    mod = KMOD_SHIFT; return true;
             case '!':  sym = SDLK_1;            mod = KMOD_SHIFT; return true;
             case '@':  sym = SDLK_2;            mod = KMOD_SHIFT; return true;
             case '#':  sym = SDLK_3;            mod = KMOD_SHIFT; return true;
@@ -186,13 +181,12 @@ namespace openmsx {
             case '?':  sym = SDLK_SLASH;       mod = KMOD_SHIFT; return true;
         }
 
-        return false; // ainda não mapeado
+        return false;
     }
 
 
     void InputEventGenerator::androidCommitText(uint32_t timestamp, const char* utf8)
     {
-        // Use relógio atual para evitar bursts com timestamp igual
         uint32_t ts = SDL_GetTicks();
 
         while (true) {
@@ -203,8 +197,6 @@ namespace openmsx {
             SDL_Keymod mod;
 
             if (!unicodeToSdlKey(unicode, sym, mod)) {
-                // fallback: não sabemos mapear -> ignore por enquanto
-                // (quando você quiser, dá pra expandir pra pontuação)
                 continue;
             }
 
@@ -218,37 +210,32 @@ namespace openmsx {
             };
 
             if (mod & KMOD_SHIFT) {
-                // 1) SHIFT DOWN (mantém pressionado)
                 SDL_Event shDown;
                 fillKeyEvent(shDown, SDL_KEYDOWN, ts, SDLK_LSHIFT, KMOD_NONE, 0);
                 eventDistributor.distributeEvent(KeyDownEvent(shDown));
                 ts += 1;
 
-                // 2) LETRA (sem mod; SHIFT já está "físico" down)
                 pushDownUp(sym, KMOD_NONE, unicode);
 
-                // 3) SHIFT UP (depois da letra)
                 SDL_Event shUp;
                 fillKeyEvent(shUp, SDL_KEYUP, ts + 2, SDLK_LSHIFT, KMOD_NONE, 0);
                 eventDistributor.distributeEvent(KeyUpEvent(shUp));
                 ts += 1;
             } else {
-                // sem shift
                 pushDownUp(sym, mod, unicode);
             }
         }
     }
 
-
     extern "C"
     JNIEXPORT void JNICALL
     Java_org_libsdl_app_OpenMSX4AndroidSDLActivity_nativeSendDpad(
             JNIEnv*, jclass, jint dir, jboolean isDown)
-    {
-        SDL_Scancode sc;
-        SDL_Keycode kc;
+{
+    SDL_Scancode sc;
+    SDL_Keycode kc;
 
-        switch (dir) {
+    switch (dir) {
             case 0: sc = SDL_SCANCODE_UP;    kc = SDLK_UP;    break;
             case 1: sc = SDL_SCANCODE_DOWN;  kc = SDLK_DOWN;  break;
             case 2: sc = SDL_SCANCODE_LEFT;  kc = SDLK_LEFT;  break;
@@ -352,6 +339,16 @@ void InputEventGenerator::poll()
 	// events because a single event type makes it easier to handle higher
 	// priority listeners that can block the event for lower priority
 	// listener (console > hotkey > msx).
+    //
+    // 2026 Android 14+ Port -> I had to rewrite this method. It was prepared for SDL1
+    //      and older versions of Android´s API. The major issue was the keypress workflow
+    // lifecycle for virtual Android´s Keyboard. It doesn´t sent keys, it sends TEXT_INPUT
+    // but I also wants use a physical keyboard or even the custom layer programable keys.
+    // This method was a nightmare to ajust, tooks me almost 2 months to get 90% full compatible
+    // with Android´s VK, but worked like a charm. It´s funny type into MSX with a virtual tablet
+    // or smartphone keyboard.
+    // I just keep the older code workflow when I was not using the Virtual Keyboard (IME), to preserve
+    // hardkeys.
 
 	SDL_Event event1, event2;
 	auto* prev = &event1;
@@ -374,10 +371,8 @@ void InputEventGenerator::poll()
 
         logSdlEvent(*curr);
 
-        // --- IME: texto confirmado ---
         if (curr->type == SDL_TEXTINPUT) {
 
-            // descarrega qualquer estado pendente de KEYDOWN físico
             if (pending) {
                 pending = false;
                 handle(*prev);
@@ -390,56 +385,45 @@ void InputEventGenerator::poll()
             continue;
         }
 
-        // --- IME: composição (ignorar) ---
+       // IME Text Editing (if it´s enabled). Ignore. I don´t want to type suggestions, just
+       // the key at once.
         if (curr->type == SDL_TEXTEDITING) {
             continue;
         }
 
-        // --- ANDROID: perda de foco / mudança de estado do app ---
+        // Lost layer focus or returning to the app
         if (curr->type == SDL_WINDOWEVENT) {
             if (curr->window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
-                __android_log_print(
-                        ANDROID_LOG_INFO,
-                        "MVP-IME",
-                        "FOCUS LOST -> resetting input state"
-                );
-
-                // IMPORTANTE: limpa estado interno de teclado
+                ALOG("FOCUS LOST -> resetting input state");
                 pending = false;
-
-                // NÃO continue; deixe o evento seguir para handle()
-                // para que outras partes do sistema saibam da perda de foco
             }
         }
 
         if (curr->type >= SDL_APP_TERMINATING &&
             curr->type <= SDL_APP_DIDENTERFOREGROUND) {
 
-            __android_log_print(
-                    ANDROID_LOG_INFO,
-                    "MVP-IME",
-                    "APP STATE EVENT %u -> resetting input state",
+            ALOG("APP STATE EVENT %u -> resetting input state",
                     curr->type
             );
 
-            // Mesma ideia: não deixe estado interno travado
             pending = false;
         }
 
         if (imeEnabled && (curr->type == SDL_KEYDOWN || curr->type == SDL_KEYUP)) {
             SDL_Keycode sym = curr->key.keysym.sym;
 
-            // deixa passar apenas teclas especiais
+            // Bypass special keys
             bool special =
                     (sym == SDLK_RETURN) || (sym == SDLK_KP_ENTER) ||
                     (sym == SDLK_BACKSPACE) || (sym == SDLK_TAB) ||
                     (sym == SDLK_ESCAPE) ||
                     (sym == SDLK_LEFT) || (sym == SDLK_RIGHT) || (sym == SDLK_UP) || (sym == SDLK_DOWN) ||
-                    (sym == SDLK_DELETE);
+                    (sym == SDLK_DELETE) ||
+                    (sym == SDLK_LSHIFT) ||
+                    (sym == SDLK_RSHIFT) ||
+                    (sym == SDLK_CAPSLOCK);
 
             if (!special) {
-                // Ignora letras/números/pontuação vindos como KEYDOWN/UP durante IME
-                // porque o texto “de verdade” já vem em SDL_TEXTINPUT.
                 continue;
             }
 
