@@ -70,7 +70,8 @@ VisibleSurface::VisibleSurface(
 	for (auto type : {EventType::MOUSE_MOTION,
 	                  EventType::MOUSE_BUTTON_DOWN,
 	                  EventType::MOUSE_BUTTON_UP,
-	                  EventType::IMGUI_ACTIVE}) {
+	                  EventType::IMGUI_ACTIVE,
+                      EventType::WINDOW}) {
 		eventDistributor.registerEventListener(type, *this);
 	}
 
@@ -198,7 +199,8 @@ VisibleSurface::~VisibleSurface()
 	for (auto type : {EventType::IMGUI_ACTIVE,
 	                  EventType::MOUSE_BUTTON_UP,
 	                  EventType::MOUSE_BUTTON_DOWN,
-	                  EventType::MOUSE_MOTION}) {
+	                  EventType::MOUSE_MOTION,
+                      EventType::WINDOW}) {
 		eventDistributor.unregisterEventListener(type, *this);
 	}
 
@@ -248,11 +250,12 @@ void VisibleSurface::createSurface(gl::ivec2 size, unsigned flags)
 #if defined(__ANDROID__)
             0,100,
             android_window_max_w, android_window_max_h,
+            flags));
 #else
             pos.x, pos.y,
             size.x, size.y,
-#endif
 			flags));
+#endif
 	if (!window) {
 		std::string err = SDL_GetError();
 		throw InitException("Could not create window: ", err);
@@ -261,7 +264,7 @@ void VisibleSurface::createSurface(gl::ivec2 size, unsigned flags)
     __android_log_print(ANDROID_LOG_INFO, "MVP0", "SDL video driver=%s", SDL_GetCurrentVideoDriver());
 
 
-        updateWindowTitle();
+    updateWindowTitle();
 
 	// prefer linear filtering (instead of nearest neighbour)
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
@@ -458,7 +461,7 @@ void VisibleSurface::setViewPort(gl::ivec2 logicalSize, bool fullScreen)
 		// On macos we set 'SDL_WINDOW_ALLOW_HIGHDPI', and in that case
 		// it's required to use SDL_GL_GetDrawableSize(), but then this
 		// 'full screen'-workaround/hack is counter-productive.
-		if (!fullScreen) {
+		if (!fullScreen && !PLATFORM_ANDROID) {
 			// ??? When switching  back from full screen to windowed mode,
 			// SDL_GL_GetDrawableSize() still returns the dimensions of the
 			// full screen window ??? Is this a bug ???

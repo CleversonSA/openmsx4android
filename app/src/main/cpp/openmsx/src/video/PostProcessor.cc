@@ -338,7 +338,7 @@ void PostProcessor::paint(OutputSurface& /*output*/)
             if (y + h > maxTop) y = maxTop - h;
         }
         // OpenGL XY are from bottom left not top left
-        int topY = 50;
+        int topY = 25;
         int glY = screen.getPhysicalSize().y - (topY + h);
         y = glY;
 #endif
@@ -355,7 +355,7 @@ void PostProcessor::paint(OutputSurface& /*output*/)
             if (y + h > maxTop) y = maxTop - h;
         }
         // OpenGL XY are from bottom left not top left
-        int topY = 50;
+        int topY = 25;
         int glY = screen.getPhysicalSize().y - (topY + h);
         y = glY;
 #endif
@@ -376,40 +376,11 @@ void PostProcessor::paint(OutputSurface& /*output*/)
         GLint curProg = 0;
         glGetIntegerv(GL_CURRENT_PROGRAM, &curProg);
 
-        /*__android_log_print(ANDROID_LOG_INFO, "MVP0",
-                            "PP BEFORE: GL_CURRENT_PROGRAM=%d",
-                            (int)curProg);
-
-        __android_log_print(ANDROID_LOG_INFO, "MVP0", "GL Extensions=%s", glGetString(GL_EXTENSIONS));
-        */
-
         const auto& glContext = *gl::context;
 
-        /*__android_log_print(ANDROID_LOG_INFO,"MVP0","GL VERSION = %s", (const char*) glGetString(GL_VERSION));
-        __android_log_print(ANDROID_LOG_INFO, "MVP0", "GLSL VERSION = %s", (const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
-        __android_log_print(ANDROID_LOG_INFO, "MVP0", "GL_RENDERER = %s", (const char*)glGetString(GL_RENDERER));
-        */
         glContext.progTex.activate();
-        //glUseProgram(glContext.progTex.get());
-
-        /*__android_log_print(ANDROID_LOG_INFO, "MVP0",
-                            "SDL current ctx=%p", SDL_GL_GetCurrentContext());*/
-
-        curProg = 0;
+              curProg = 0;
         glGetIntegerv(GL_CURRENT_PROGRAM, &curProg);
-
-        /*__android_log_print(ANDROID_LOG_INFO, "MVP0",
-                            "PP: GL_CURRENT_PROGRAM=%d unifTexColor=%d unifTexMvp=%d",
-                            (int)curProg,
-                            (int)glContext.unifTexColor,
-                            (int)glContext.unifTexMvp);
-
-		gl::checkGLError("Saralhi");
-
-        if (curProg == 0) {
-            __android_log_print(ANDROID_LOG_ERROR, "MVP0",
-                                "PP: no current program (GL_CURRENT_PROGRAM=0) before glUniform4f");
-        }*/
 
         glUniform4f(glContext.unifTexColor,
 				1.0f, 1.0f, 1.0f, 1.0f);

@@ -24,8 +24,8 @@
         <activity
             android:name="org.libsdl.app.OpenMSX4AndroidSDLActivity"
             android:exported="true"
-            android:screenOrientation="portrait"
-            android:configChanges="keyboard|orientation|keyboardHidden|screenSize|screenLayout|uiMode"
+            android:screenOrientation="fullUser"
+            android:configChanges="keyboard|orientation|keyboardHidden|screenSize|screenLayout|uiMode|smallestScreenSize"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

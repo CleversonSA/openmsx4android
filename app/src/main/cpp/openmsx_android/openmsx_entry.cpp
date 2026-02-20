@@ -78,6 +78,7 @@ namespace openmsx {
         SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "0");
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
         SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
+        SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait PortraitUpsideDown");
 
         Reactor reactor;
 
