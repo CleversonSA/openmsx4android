@@ -121,10 +121,17 @@ No port, antes de iniciar o motor do OpenMSX verifico se o arquivo
 Este arquivo não é um batch, mas contém tokens para chamar o openmsx
 passando parâmetros, por exemplo:
 
--machine "Gradiente_Expert_GPC-1" -command "set fullscreen on" -command
-"set scale_factor 2" -command "set mute off" -command "set blur 0"
--command "set auto_enable_reverse off" -exta Musical_Memory_Mapper -extb
-slotexpander -ext DDX_3.0 -ext nextor
+```
+-machine "Gradiente_Expert_GPC-1"
+-command "set fullscreen on"
+-command ;"set scale_factor 2"
+-command "set mute off"
+-command "set blur 0"
+-command "set auto_enable_reverse off"
+-exta Musical_Memory_Mapper
+-extb slotexpander
+-ext DDX_3.0 -ext nextor
+```
 
 Assim posso iniciar o openmsx com configurações personalizadas.
 
